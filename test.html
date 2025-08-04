@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .profile-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      aspect-ratio: 1/1;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: #ddd;
+      border: 3px solid #0077ff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.05);
+    }
+
+    #picUpload {
+      display: none;
+    }
+
+    .info {
+      margin-top: 15px;
+      font-size: 1.1rem;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      margin: 30px 0 10px;
+      border-bottom: 2px solid #0077ff;
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+
+    .menu {
+      position: absolute;
+      top: 140px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      width: 150px;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+    }
+
+    .menu button {
+      padding: 10px;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+
+    .menu button:hover {
+      background-color: #f0f0f0;
+    }
+
+    .resource-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .resource-item {
+      padding: 10px 16px;
+      background-color: #eef4ff;
+      border: 1px solid #0077ff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .resource-item:hover {
+      background-color: #dce9ff;
+    }
+
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Welcome, <span id="userName">User</span>!</h1>
+
+    <div class="profile-section">
+      <img id="profilePic" src="./image/profile.jpg" alt="Profile Picture" class="profile-pic" />
+      <input type="file" id="picUpload" accept="image/*" />
+
+      <div id="picMenu" class="menu">
+        <button id="updatePicBtn">Update Profile</button>
+        <button id="deletePicBtn">Delete</button>
+      </div>
+
+      <div class="info">Email: <span id="emailDisplay">user@example.com</span></div>
+    </div>
+
+    <div class="resource-section">
+      <div class="reading-books">Currently Reading Books</div>
+
+      <div class="ordered-book">Ordered Books</div>
+
+      <div class="resource-box" id="resourceList"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const userName = localStorage.getItem("username") || "User";
+      const userEmail = localStorage.getItem("email") || "user@example.com";
+      const storedPic = localStorage.getItem("profilePic");
+      let uploadedResources = JSON.parse(localStorage.getItem("resources") || "[]");
+
+      document.getElementById("userName").textContent = userName;
+      document.getElementById("emailDisplay").textContent = userEmail;
+
+      const profilePic = document.getElementById("profilePic");
+      const picUpload = document.getElementById("picUpload");
+      const picMenu = document.getElementById("picMenu");
+
+      if (storedPic) {
+        profilePic.src = storedPic;
+      }
+
+      // Fallback image if image path broken
+      profilePic.onerror = () => {
+        profilePic.src = "https://via.placeholder.com/120x120?text=User";
+      };
+
+      profilePic.addEventListener("click", (e) => {
+        e.stopPropagation();
+        picMenu.style.display = picMenu.style.display === "flex" ? "none" : "flex";
+      });
+
+      document.addEventListener("click", () => {
+        picMenu.style.display = "none";
+      });
+
+      document.getElementById("updatePicBtn").addEventListener("click", () => {
+        picUpload.click();
+      });
+
+      picUpload.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            profilePic.src = e.target.result;
+            localStorage.setItem("profilePic", e.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      document.getElementById("deletePicBtn").addEventListener("click", () => {
+        profilePic.src = "https://via.placeholder.com/120x120?text=User";
+        localStorage.removeItem("profilePic");
+      });
+
+      function renderResources() {
+        const resourceList = document.getElementById("resourceList");
+        resourceList.innerHTML = "";
+
+        if (uploadedResources.length === 0) {
+          resourceList.innerHTML = "<div>No Any Activity Yet</div>";
+          return;
+        }
+
+        uploadedResources.forEach((resource, index) => {
+          const div = document.createElement("div");
+          div.className = "resource-item";
+          div.textContent = resource;
+          div.addEventListener("click", () => {
+            const confirmDelete = confirm(`Delete resource: "${resource}"?`);
+            if (confirmDelete) {
+              uploadedResources.splice(index, 1);
+              localStorage.setItem("resources", JSON.stringify(uploadedResources));
+              renderResources();
+            }
+          });
+          resourceList.appendChild(div);
+        });
+      }
+
+      renderResources();
+    });
+  </script>
+</body>
+</html>

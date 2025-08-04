@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Book Point</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .sidebar {
+            background-color: #27AE60; /* Matches login page header color */
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            transition: width 0.3s;
+        }
+        .sidebar a {
+            color: #d1d5db;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .sidebar a:hover {
+            background-color: #3bd87d; /* Matches navbar hover from login page */
+            color: white;
+        }
+        .sidebar .active {
+            background-color: #219653;
+            color: white;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background-color: #27AE60;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #219653;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar span {
+                display: none;
+            }
+            .content {
+                margin-left: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="flex items-center justify-center py-6">
+            <a href="./index.html" class="flex items-center text-2xl font-bold text-white">
+                <i class="fas fa-book mr-2"></i> Book Point
+            </a>
+        </div>
+        <nav>
+            <a href="#dashboard" class="active"><i class="fas fa-tachometer-alt mr-3"></i><span>Dashboard</span></a>
+            <a href="#books"><i class="fas fa-book-open mr-3"></i><span>Manage Books</span></a>
+            <a href="#users"><i class="fas fa-users mr-3"></i><span>Manage Users</span></a>
+            <a href="#orders"><i class="fas fa-shopping-cart mr-3"></i><span>Manage Orders</span></a>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt mr-3"></i><span>Logout</span></a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Dashboard Overview -->
+        <section id="dashboard">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+                <p class="text-lg">Welcome, <span id="admin-name">Admin</span>!</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card">
+                    <h3 class="text-lg font-semibold">Total Books</h3>
+                    <p class="text-2xl font-bold text-green-600" id="total-books">250</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-semibold">Total Users</h3>
+                    <p class="text-2xl font-bold text-green-600" id="total-users">1,200</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-semibold">Total Orders</h3>
+                    <p class="text-2xl font-bold text-green-600" id="total-orders">450</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manage Books -->
+        <section id="books" class="mt-10">
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Manage Books</h2>
+                    <a href="./previewbook.html" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Add New Book</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="books-table">
+                            <!-- Books will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manage Users -->
+        <section id="users" class="mt-10">
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Manage Users</h2>
+                    <a href="#add-user" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Add New User</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                            <!-- Users will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manage Orders -->
+        <section id="orders" class="mt-10">
+            <div class="card">
+                <h2 class="text-2xl font-bold mb-4">Manage Orders</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table">
+                            <!-- Orders will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Check if user is admin
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || !user.isAdmin) {
+                alert("Access denied. Admins only.");
+                window.location.href = 'in.html';
+                return;
+            }
+
+            // Display admin name
+            document.getElementById('admin-name').textContent = `${user.firstName} ${user.lastName}`;
+
+            // Sidebar navigation
+            const navLinks = document.querySelectorAll('.sidebar a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (!link.getAttribute('onclick')) {
+                        e.preventDefault();
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                        const sectionId = link.getAttribute('href').substring(1);
+                        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Fetch and display books
+            function fetchBooks() {
+                // Replace with actual API call
+                const books = [
+                    { id: 1, title: "Ikigai", author: "Héctor García", price: 399, stock: 50 },
+                    { id: 2, title: "1984", author: "George Orwell", price: 299, stock: 30 },
+                ];
+                const tbody = document.getElementById('books-table');
+                tbody.innerHTML = books.map(book => `
+                    <tr>
+                        <td>${book.id}</td>
+                        <td>${book.title}</td>
+                        <td>${book.author}</td>
+                        <td>₹${book.price}</td>
+                        <td>${book.stock}</td>
+                        <td>
+                            <a href="#edit-book" class="btn btn-primary mr-2"><i class="fas fa-edit"></i></a>
+                            <a href="#delete-book" class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Fetch and display users
+            function fetchUsers() {
+                // Replace with actual API call
+                const users = [
+                    { id: 1, name: `${user.firstName} ${user.lastName}`, email: user.email, role: "Admin" },
+                ];
+                const tbody = document.getElementById('users-table');
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <a href="#edit-user" class="btn btn-primary mr-2"><i class="fas fa-edit"></i></a>
+                            <a href="#delete-user" class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Fetch and display orders
+            function fetchOrders() {
+                // Replace with actual API call
+                const orders = [
+                    { id: "ORD001", customer: `${user.firstName} ${user.lastName}`, total: 798, status: "Pending" },
+                ];
+                const tbody = document.getElementById('orders-table');
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${order.customer}</td>
+                        <td>₹${order.total}</td>
+                        <td>${order.status}</td>
+                        <td>
+                            <a href="#view-order" class="btn btn-primary mr-2"><i class="fas fa-eye"></i></a>
+                            <a href="#update-status" class="btn btn-primary"><i class="fas fa-sync"></i></a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Initialize data
+            fetchBooks();
+            fetchUsers();
+            fetchOrders();
+        });
+
+        function logout() {
+            fetch('http://localhost:5000/api/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            })
+            .catch(error => console.error('Logout error:', error));
+        }
+    </script>
+</body>
+</html>
